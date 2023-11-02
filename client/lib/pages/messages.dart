@@ -11,34 +11,81 @@ class MessagesPage extends StatefulWidget {
 }
 
 class _MessagesPageState extends State<MessagesPage> {
-  String inputvalue = 'amine';
+  // String inputvalue = 'amine';
   List messages = [];
+  bool isupdate = false;
+  String tmpid = '';
   void postmessage() async {
     // BaseOptions options = BaseOptions(
     //   connectTimeout: 5 * 6000,
     //   receiveTimeout: 5*6000,
     // );
     Dio dio = Dio();
-    // dio.options.connectTimeout = Duration(seconds: 10);
     try {
-      Response response = await dio
-          .post('http://127.0.0.1:5000/message', data: {'msg': inputvalue});
-      if (response.statusCode == 200) {
-        print('response succefull');
-        setState(() {
-          messages.add(inputvalue);
-        });
-        setState(() {
-          inputvalue = '';
-        });
-      } else {
-        // Handle other response status codes or errors if necessary
-        print('response failed');
-      }
+      var response = await dio.post(
+        'http://localhost:5000/message',
+        data: {'msg': controller.text},
+      );
+      print('response succefull');
+      getmessage();
+      // setState(() {
+      //   inputvalue = '';
+      // });
       print('responsse.data :  ${response.data}');
+      controller.clear();
     } catch (e) {
       print('error in posting from front : $e');
+      // print('input value : $inputvalue');
     }
+  }
+
+  void getmessage() async {
+    Dio dio = Dio();
+    try {
+      var response = await dio.get('http://localhost:5000/getmessage');
+
+      // messages = [...response.data['result']];
+      setState(() {
+        messages = List.of(response.data['result']);
+      });
+
+      print('messages list : $messages');
+    } catch (e) {
+      print('error while getting : $e');
+    }
+  }
+
+  void deletemessage(id) async {
+    Dio dio = Dio();
+    try {
+      var response =
+          await dio.delete('http://localhost:5000/deletemessage/$id');
+      print('delete response : ${response.data}');
+      getmessage();
+    } catch (e) {
+      print('error in deleting : $e');
+    }
+  }
+
+  void updatemessage(id) async {
+    Dio dio = Dio();
+    try {
+      var response = dio.put('http://localhost:5000/updatemessage/$id',
+          data: {'msg': controller.text});
+      getmessage();
+      setState(() {
+        isupdate = !isupdate;
+      });
+    } catch (e) {
+      print('error in updating $e');
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getmessage();
   }
 
   TextEditingController controller = TextEditingController();
@@ -97,24 +144,49 @@ class _MessagesPageState extends State<MessagesPage> {
                           child: Column(
                             children: [
                               Text(
-                                '$item\n',
+                                '${item['msg']}\n',
                                 style: const TextStyle(
                                     color: Colors.white, fontSize: 25),
                               ),
-                              IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    messages.remove(item);
-                                  });
-                                },
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.white,
-                                ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      // setState(() {
+                                      //   messages.remove(item);
+                                      // });
+                                      deletemessage(item['_id']);
+                                    },
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      // deletemessage(item['_id']);
+                                      setState(() {
+                                        controller.text = item['msg'];
+                                      });
+                                      setState(() {
+                                        isupdate = !isupdate;
+                                      });
+                                      setState(() {
+                                        tmpid = item['_id'];
+                                      });
+                                    },
+                                    icon: const Icon(
+                                      Icons.mode,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
                               )
                             ],
                           ));
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),
@@ -137,9 +209,9 @@ class _MessagesPageState extends State<MessagesPage> {
                       style: const TextStyle(color: Colors.white),
                       controller: controller,
                       onChanged: (value) {
-                        setState(() {
-                          inputvalue = value;
-                        });
+                        // setState(() {
+                        //   inputvalue = value;
+                        // });
                       },
                       decoration: const InputDecoration(
                         hintText: 'Enter your message',
@@ -151,11 +223,13 @@ class _MessagesPageState extends State<MessagesPage> {
                   ),
                   IconButton(
                     onPressed: () {
-                      if (inputvalue != '') {
+                      // ignore: unrelated_type_equality_checks
+                      if (controller.text != '' && isupdate == false) {
                         postmessage();
-                        print(inputvalue);
                       }
-                      controller.clear();
+                      if (controller.text != '' && isupdate == true) {
+                        updatemessage(tmpid);
+                      }
                     },
                     icon: const Icon(Icons.send_rounded),
                   )
