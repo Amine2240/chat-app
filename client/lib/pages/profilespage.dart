@@ -10,7 +10,7 @@ class profile {
   final int id;
   profile({
     required this.id,
-    required this.name, 
+    required this.name,
     required this.lastmsg,
     required this.profileimg,
   });
@@ -57,6 +57,7 @@ class _ProfilesPageState extends State<ProfilesPage> {
         profileimg: 'profileimg'),
   ];
   String inputvalue = '';
+  // TextEditingController controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,14 +96,17 @@ class _ProfilesPageState extends State<ProfilesPage> {
                       inputvalue = value;
                     });
                   },
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
+                  // controller: controller,
+                  style:
+                      const TextStyle(color: Color.fromARGB(255, 11, 10, 10)),
+                  decoration: const InputDecoration(
                     border: InputBorder.none,
                     hintText: 'search',
-                    hintStyle: TextStyle(color: Colors.white),
+                    hintStyle:
+                        TextStyle(color: Color.fromARGB(255, 78, 78, 78)),
                     prefixIcon: Icon(
                       Icons.search,
-                      color: Colors.white,
+                      color: Color.fromARGB(255, 163, 27, 27),
                     ),
                   ),
                 ),
@@ -123,26 +127,31 @@ class _ProfilesPageState extends State<ProfilesPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ...allprofileslist
-                  .where((item) => item.name
-                      .toLowerCase()
-                      .contains(inputvalue.toLowerCase()))
-                  .map((item) {
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MessagesPage(profilename: item.name,),
-                        ));
-                  },
-                  child: Profile(
-                      name: item.name,
-                      lastmsg: item.lastmsg,
-                      profileimag: item.profileimg,
-                      id: item.id),
-                );
-              })
+              if (allprofileslist.length != 0)
+                ...allprofileslist
+                    .where((item) => item.name
+                        .toLowerCase()
+                        .contains(inputvalue.toLowerCase()))
+                    .map((item) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MessagesPage(
+                              profilename: item.name,
+                            ),
+                          ));
+                    },
+                    child: Profile(
+                        name: item.name,
+                        lastmsg: item.lastmsg,
+                        profileimag: item.profileimg,
+                        id: item.id),
+                  );
+                })
+              else
+                Center(child: Text('no result'))
             ],
           ),
         ),

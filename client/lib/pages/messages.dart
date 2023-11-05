@@ -43,7 +43,7 @@ class _MessagesPageState extends State<MessagesPage> {
     Dio dio = Dio();
     try {
       var response = await dio.get('http://localhost:5000/getmessage');
-
+      print('response ${response.data}');
       // messages = [...response.data['result']];
       setState(() {
         messages = List.of(response.data['result']);

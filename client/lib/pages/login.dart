@@ -8,8 +8,8 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green, 
-        title: Center( 
+        backgroundColor: Colors.green,
+        title: const Center(
             child: Text(
           'Chat App',
           style: TextStyle(),
@@ -29,32 +29,33 @@ class LoginPage extends StatelessWidget {
                 Container(
                   width: 300,
                   height: 50,
-                  margin: EdgeInsets.only(bottom: 20),
+                  margin: const EdgeInsets.only(bottom: 20),
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => AuthFormLogin()));
+                              builder: (context) => const AuthFormLogin()));
                     },
-                    child: Text('Log in'),
                     style: ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(Colors.green),
+                        backgroundColor:
+                            const MaterialStatePropertyAll(Colors.green),
                         shape: MaterialStatePropertyAll(RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30)))),
+                    child: const Text('Log in'),
                   ),
                 ),
-                Container(
+                SizedBox(
                   width: 300,
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {},
-                    child: Text('Sign in'),
                     style: ButtonStyle(
                         backgroundColor:
-                            MaterialStatePropertyAll(Colors.orange),
+                            const MaterialStatePropertyAll(Colors.orange),
                         shape: MaterialStatePropertyAll(RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30)))),
+                    child: const Text('Sign in'),
                   ),
                 ),
               ],
