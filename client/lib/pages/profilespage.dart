@@ -57,6 +57,7 @@ class _ProfilesPageState extends State<ProfilesPage> {
         profileimg: 'profileimg'),
   ];
   String inputvalue = '';
+  
   // TextEditingController controller = TextEditingController();
   @override
   Widget build(BuildContext context) {

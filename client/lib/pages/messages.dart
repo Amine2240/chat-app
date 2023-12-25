@@ -1,5 +1,9 @@
+// ignore_for_file: unused_local_variable, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_chat_app/widgets/promptmsg.dart';
+import 'package:dash_chat_2/dash_chat_2.dart';
 
 // ignore: must_be_immutable
 class MessagesPage extends StatefulWidget {
@@ -12,9 +16,11 @@ class MessagesPage extends StatefulWidget {
 
 class _MessagesPageState extends State<MessagesPage> {
   // String inputvalue = 'amine';
-  List messages = [];
+  ChatUser user = ChatUser(id: '1', firstName: 'amine', lastName: 'kadoum');
+  List<ChatMessage> messages = [];
   bool isupdate = false;
   String tmpid = '';
+  String gptresponse = '';
   void postmessage() async {
     // BaseOptions options = BaseOptions(
     //   connectTimeout: 5 * 6000,
@@ -26,12 +32,12 @@ class _MessagesPageState extends State<MessagesPage> {
         'http://localhost:5000/message',
         data: {'msg': controller.text},
       );
-      print('response succefull');
+      // print('response succefull');
       getmessage();
       // setState(() {
       //   inputvalue = '';
       // });
-      print('responsse.data :  ${response.data}');
+      // print('responsse.data :  ${response.data}');
       controller.clear();
     } catch (e) {
       print('error in posting from front : $e');
@@ -43,13 +49,13 @@ class _MessagesPageState extends State<MessagesPage> {
     Dio dio = Dio();
     try {
       var response = await dio.get('http://localhost:5000/getmessage');
-      print('response ${response.data}');
+      // print('response ${response.data}');
       // messages = [...response.data['result']];
       setState(() {
         messages = List.of(response.data['result']);
       });
 
-      print('messages list : $messages');
+      // print('messages list : $messages');
     } catch (e) {
       print('error while getting : $e');
     }
@@ -60,7 +66,7 @@ class _MessagesPageState extends State<MessagesPage> {
     try {
       var response =
           await dio.delete('http://localhost:5000/deletemessage/$id');
-      print('delete response : ${response.data}');
+      // print('delete response : ${response.data}');
       getmessage();
     } catch (e) {
       print('error in deleting : $e');
@@ -81,6 +87,22 @@ class _MessagesPageState extends State<MessagesPage> {
     }
   }
 
+  void postgptprompt() async {
+    Dio dio = Dio();
+    try {
+      var response = await dio.post('http://localhost:5000/chatgpt/api',
+          data: {'promptresult': controller.text});
+
+      // print('posted scuucucufully');
+      print('gpt response from front : ${response.data}');
+      setState(() {
+        gptresponse = response.data['gptanswer'];
+      });
+    } catch (e) {
+      print('error in posting gpt prompt $e');
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -92,159 +114,36 @@ class _MessagesPageState extends State<MessagesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // resizeToAvoidBottomInset:  false,
-      backgroundColor: Colors.blue,
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(widget.profilename),
-        backgroundColor: Colors.green,
-        automaticallyImplyLeading: false,
-        // actions: [
-        //   Icon(Icons.rounded_corner)
-        // ],
-        leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.arrow_back)),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 530),
-              child: Container(
-                // height: messages.length == 0 ? 530 : double.,
-                padding: const EdgeInsets.only(bottom: 20, right: 20),
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(50),
-                        bottomRight: Radius.circular(50))),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ...messages.map((item) {
-                      return Container(
-                          width: 200,
-                          margin: const EdgeInsets.symmetric(vertical: 5),
-                          // padding: EdgeInsets.fromLTRB(20, 25, 20, 0),
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              gradient: const LinearGradient(
-                                  begin: Alignment.bottomLeft,
-                                  colors: [
-                                    Color.fromARGB(255, 0, 80, 145),
-                                    Color.fromARGB(255, 54, 197, 244),
-                                  ])),
-                          child: Column(
-                            children: [
-                              Text(
-                                '${item['msg']}\n',
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 25),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      // setState(() {
-                                      //   messages.remove(item);
-                                      // });
-                                      deletemessage(item['_id']);
-                                    },
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      // deletemessage(item['_id']);
-                                      setState(() {
-                                        controller.text = item['msg'];
-                                      });
-                                      setState(() {
-                                        isupdate = !isupdate;
-                                      });
-                                      setState(() {
-                                        tmpid = item['_id'];
-                                      });
-                                    },
-                                    icon: const Icon(
-                                      Icons.mode,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            ],
-                          ));
-                    }),
-                  ],
-                ),
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(top: 20, bottom: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    height: 50,
-                    width: 350,
-                    padding: const EdgeInsets.only(left: 10),
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 0, 64, 175),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(width: 1),
-                    ),
-                    child: TextField(
-                      style: const TextStyle(color: Colors.white),
-                      controller: controller,
-                      onChanged: (value) {
-                        // setState(() {
-                        //   inputvalue = value;
-                        // });
-                      },
-                      decoration: const InputDecoration(
-                        hintText: 'Enter your message',
-                        hintStyle: TextStyle(
-                            color: Color.fromARGB(255, 164, 164, 164)),
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      // ignore: unrelated_type_equality_checks
-                      if (controller.text != '' && isupdate == false) {
-                        postmessage();
-                      }
-                      if (controller.text != '' && isupdate == true) {
-                        updatemessage(tmpid);
-                      }
-                    },
-                    icon: const Icon(Icons.send_rounded),
-                  )
-                ],
-              ),
-            ),
-          ],
+        // resizeToAvoidBottomInset:  false,
+        backgroundColor: Colors.blue,
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text(widget.profilename),
+          backgroundColor: Colors.green,
+          automaticallyImplyLeading: false,
+          // actions: [
+          //   Icon(Icons.rounded_corner)
+          // ],
+          leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(Icons.arrow_back)),
         ),
-      ),
-      // bottomNavigationBar: BottomAppBar(
-      //   elevation: 0,
-      //   color: Colors.blue,
-      //   height: 100,
-      //   child:
-      // ),
-    );
+        body: DashChat(
+            currentUser: user,
+            onSend: (ChatMessage m) {
+              setState(() {
+                messages.insert(0, m);
+              });
+            },
+            messages: messages,)
+        // bottomNavigationBar: BottomAppBar(
+        //   elevation: 0,
+        //   color: Colors.blue,
+        //   height: 100,
+        //   child:
+        // ),
+        );
   }
 }
