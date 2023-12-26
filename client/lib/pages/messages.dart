@@ -17,6 +17,7 @@ class MessagesPage extends StatefulWidget {
 class _MessagesPageState extends State<MessagesPage> {
   // String inputvalue = 'amine';
   ChatUser user = ChatUser(id: '1', firstName: 'amine', lastName: 'kadoum');
+  ChatUser gptuser = ChatUser(id: "2", firstName: "gpt", lastName: "model");
   List<ChatMessage> messages = [];
   bool isupdate = false;
   String tmpid = '';
@@ -131,13 +132,21 @@ class _MessagesPageState extends State<MessagesPage> {
               icon: const Icon(Icons.arrow_back)),
         ),
         body: DashChat(
-            currentUser: user,
-            onSend: (ChatMessage m) {
-              setState(() {
-                messages.insert(0, m);
-              });
-            },
-            messages: messages,)
+          messageOptions: MessageOptions(
+            textColor: Colors.white,
+            currentUserContainerColor: Colors.blue,
+            showOtherUsersAvatar: true,
+            showCurrentUserAvatar: true,
+            
+          ),
+          currentUser: user,
+          onSend: (ChatMessage m) {
+            setState(() {
+              messages.insert(0, m);
+            });
+          },
+          messages: messages,
+        )
         // bottomNavigationBar: BottomAppBar(
         //   elevation: 0,
         //   color: Colors.blue,
