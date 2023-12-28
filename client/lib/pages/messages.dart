@@ -16,9 +16,7 @@ class MessagesPage extends StatefulWidget {
 
 class _MessagesPageState extends State<MessagesPage> {
   // String inputvalue = 'amine';
-  ChatUser user = ChatUser(id: '1', firstName: 'amine', lastName: 'kadoum');
-  ChatUser gptuser = ChatUser(id: "2", firstName: "gpt", lastName: "model");
-  List<ChatMessage> messages = [];
+
   bool isupdate = false;
   String tmpid = '';
   String gptresponse = '';
@@ -49,12 +47,12 @@ class _MessagesPageState extends State<MessagesPage> {
   void getmessage() async {
     Dio dio = Dio();
     try {
-      var response = await dio.get('http://localhost:5000/getmessage');
-      // print('response ${response.data}');
-      // messages = [...response.data['result']];
-      setState(() {
-        messages = List.of(response.data['result']);
-      });
+      // var response = await dio.get('http://localhost:5000/getmessage');
+      // // print('response ${response.data}');
+      // // messages = [...response.data['result']];
+      // setState(() {
+      //   messages = List.of(response.data['result']);
+      // });
 
       // print('messages list : $messages');
     } catch (e) {
@@ -88,11 +86,11 @@ class _MessagesPageState extends State<MessagesPage> {
     }
   }
 
-  void postgptprompt() async {
+  void postgptprompt(String text) async {
     Dio dio = Dio();
     try {
       var response = await dio.post('http://localhost:5000/chatgpt/api',
-          data: {'promptresult': controller.text});
+          data: {'promptresult': text});
 
       // print('posted scuucucufully');
       print('gpt response from front : ${response.data}');
@@ -112,6 +110,28 @@ class _MessagesPageState extends State<MessagesPage> {
   }
 
   TextEditingController controller = TextEditingController();
+
+  ChatUser _user = ChatUser(id: '1', firstName: 'amine', lastName: 'kadoum');
+  ChatUser gptuser = ChatUser(id: "2", firstName: "gpt", lastName: "model");
+  List<ChatMessage> messages = [
+    // ChatMessage(
+    //     text: "i am gpt model",
+    //     user: ChatUser(id: "3", firstName: "gpt", lastName: "model"),
+    //     createdAt: DateTime.now()),
+    // ChatMessage(
+    //     text: "heloow",
+    //     user: ChatUser(id: "4", firstName: "gpt", lastName: "model"),
+    //     createdAt: DateTime.now()),
+    // ChatMessage(
+    //     user: ChatUser(id: '1', firstName: 'amiofoffne', lastName: 'kadoum'),
+    //     createdAt: DateTime.now(),
+    //     text: "heyfmdsklqjthere"),
+    // ChatMessage(
+    //     text: "heloow",
+    //     user: ChatUser(id: "4", firstName: "gpt", lastName: "model"),
+    //     createdAt: DateTime.now()),
+  ];
+  int index = -1;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,17 +153,31 @@ class _MessagesPageState extends State<MessagesPage> {
         ),
         body: DashChat(
           messageOptions: MessageOptions(
-            textColor: Colors.white,
-            currentUserContainerColor: Colors.blue,
+            textColor: Colors.black,
+            currentUserContainerColor: Colors.purple,
             showOtherUsersAvatar: true,
             showCurrentUserAvatar: true,
-            
           ),
-          currentUser: user,
+          currentUser: _user,
+          // typingUsers: [
+          //   ChatUser(id: "3", firstName: "termai", lastName: "chaima")
+          // ],
           onSend: (ChatMessage m) {
+            postgptprompt(m.text);
             setState(() {
-              messages.insert(0, m);
+              index++;
+              messages.insert(
+                  index,
+                  ChatMessage(
+                      user: _user, createdAt: DateTime.now(), text: m.text));
+              messages.insert(
+                  index++,
+                  ChatMessage(
+                      user: gptuser,
+                      createdAt: DateTime.now(),
+                      text: gptresponse));
             });
+            // messages.reversed.toList();
           },
           messages: messages,
         )
