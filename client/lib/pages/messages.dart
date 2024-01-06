@@ -86,16 +86,29 @@ class _MessagesPageState extends State<MessagesPage> {
     }
   }
 
-  void postgptprompt(String text) async {
+  void postgptprompt(ChatMessage m) async {
     Dio dio = Dio();
     try {
-      var response = await dio.post('http://localhost:5000/chatgpt/api',
-          data: {'promptresult': text});
-
+      
+      var response = await dio.post('http://192.168.1.42:5000/chatgpt/api',
+          data: {'promptresult': m.text});
+//var response = await dio.post('http://192.168.1.41:5000/chatgpt/api',{data : })
       // print('posted scuucucufully');
       print('gpt response from front : ${response.data}');
+      print("objeckljdsqmlfdmlkdsflmkt");
+      // setState(() {
+
+      // });
+
       setState(() {
         gptresponse = response.data['gptanswer'];
+        messages.insert(index,
+            ChatMessage(user: _user, createdAt: DateTime.now(), text: m.text));
+        messages.insert(
+            index++,
+            ChatMessage(
+                user: gptuser, createdAt: DateTime.now(), text: gptresponse));
+        index++;
       });
     } catch (e) {
       print('error in posting gpt prompt $e');
@@ -131,7 +144,7 @@ class _MessagesPageState extends State<MessagesPage> {
     //     user: ChatUser(id: "4", firstName: "gpt", lastName: "model"),
     //     createdAt: DateTime.now()),
   ];
-  int index = -1;
+  int index = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,20 +176,10 @@ class _MessagesPageState extends State<MessagesPage> {
           //   ChatUser(id: "3", firstName: "termai", lastName: "chaima")
           // ],
           onSend: (ChatMessage m) {
-            postgptprompt(m.text);
-            setState(() {
-              index++;
-              messages.insert(
-                  index,
-                  ChatMessage(
-                      user: _user, createdAt: DateTime.now(), text: m.text));
-              messages.insert(
-                  index++,
-                  ChatMessage(
-                      user: gptuser,
-                      createdAt: DateTime.now(),
-                      text: gptresponse));
-            });
+            
+            postgptprompt(m);
+            
+
             // messages.reversed.toList();
           },
           messages: messages,
